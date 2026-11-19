@@ -18,8 +18,17 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"sync"
+
+	xdraw "golang.org/x/image/draw"
+)
+
+// iconScale sizes every signal icon and direction wedge. 1 is the size on the openrailwaymap.app
+// website, 2 uses the sheet's own pixels (sharpest), and anything in between is smoothed
+const (
+	iconScale = 1.5
 )
 
 type spriteEntry struct {
@@ -149,10 +158,29 @@ func (s *sprite) icon(name string) *image.NRGBA {
 	if e, ok := s.entries[name]; ok && e.Width > 0 && e.Height > 0 {
 		rect := image.Rect(e.X, e.Y, e.X+e.Width, e.Y+e.Height)
 		if rect.In(s.sheet.Rect) {
-			icon = image.NewNRGBA(image.Rect(0, 0, e.Width, e.Height))
-			draw.Draw(icon, icon.Rect, s.sheet, rect.Min, draw.Src)
+			ratio := e.PixelRatio
+			if ratio < 1 {
+				ratio = 1
+			}
+			icon = resample(s.sheet, rect, ratio/iconScale)
 		}
 	}
 	s.cache[name] = icon
 	return icon
+}
+
+// resample cuts rect out of src and rescales it. step is how many source pixels go into one
+// output pixel (2 = half size, 1 = unchanged, below 1 = bigger). when the size does not change
+// the pixels are just copied.
+func resample(src *image.NRGBA, rect image.Rectangle, step float64) *image.NRGBA {
+	outW := int(math.Ceil(float64(rect.Dx())/step - 1e-9))
+	outH := int(math.Ceil(float64(rect.Dy())/step - 1e-9))
+	out := image.NewNRGBA(image.Rect(0, 0, outW, outH))
+
+	if outW == rect.Dx() && outH == rect.Dy() {
+		draw.Draw(out, out.Rect, src, rect.Min, draw.Src)
+		return out
+	}
+	xdraw.CatmullRom.Scale(out, out.Rect, src, rect, xdraw.Src, nil)
+	return out
 }

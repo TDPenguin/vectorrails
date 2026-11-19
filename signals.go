@@ -463,6 +463,9 @@ func newSignalsHandler(client *http.Client, base string, spr *sprite) http.Handl
 				log.Printf("ERR  signals z=%d x=%d y=%d: %v", z, x, y, err)
 				img = missingTile()
 			default:
+				for _, s := range signals {
+					drawDirection(img, s, spr, z)
+				}
 				var missing []string
 				for _, s := range signals {
 					missing = append(missing, drawSignal(img, s, spr)...)
