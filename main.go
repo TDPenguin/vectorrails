@@ -18,6 +18,8 @@ func main() {
 	client := &http.Client{Timeout: 60 * time.Second}
 	base := strings.TrimRight(*upstream, "/")
 
+	http.HandleFunc("/signals/", newSignalsHandler(client, base, loadSprite(client, base)))
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		url := base + r.URL.Path
 
@@ -28,8 +30,7 @@ func main() {
 		}
 
 		req.Header.Set("Accept", "application/x-protobuf")
-		req.Header.Set("Referer", "https://openrailwaymap.app/")
-		req.Header.Set("User-Agent", "NIMBYRails")
+		setHeaders(req)
 
 		resp, err := client.Do(req)
 		if err != nil {
