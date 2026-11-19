@@ -1,4 +1,4 @@
-# vectorbox
+# vectorrails
 
 A small local proxy to bridge OpenRailwayMap (ORM) vector tiles with NIMBY Rails.
 
@@ -11,8 +11,8 @@ To be used with ***mods I am not done with yet.***
 ## Build and run
 
 ```
-go build -o vectorbox .
-./vectorbox
+go build -o vectorrails .
+./vectorrails
 ```
 
 The proxy listens on `127.0.0.1:8080` and forwards to `https://openrailwaymap.app`.
@@ -44,7 +44,7 @@ Some layers may not be valid, check the network inspection logs on OpenRailwayMa
 Example, using a self-hosted ORM server:
 
 ```
-./vectorbox -upstream http://localhost:8000
+./vectorrails -upstream http://localhost:8000
 ```
 
 ## Using the public ORM server
