@@ -1,3 +1,3 @@
-module ormproxy
+module vectorrails
 
 go 1.27.3
